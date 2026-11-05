@@ -1,0 +1,168 @@
+{
+  "reference_date": "2026-11-05",
+  "seed": 42,
+  "shape": [
+    400,
+    23
+  ],
+  "target_counts": {
+    "SUSPICIOUS": 156,
+    "VERIFIED": 150,
+    "MANUAL REVIEW": 86,
+    "ACCESS DENIED": 8
+  },
+  "scenario_counts": {
+    "genuine_valid": 150,
+    "name_altered": 30,
+    "id_not_found": 30,
+    "genuine_expired": 30,
+    "hash_mismatch": 24,
+    "database_unavailable": 24,
+    "qualification_altered": 20,
+    "institution_altered": 20,
+    "duplicate_id": 20,
+    "name_initials_variant": 20,
+    "missing_field": 12,
+    "invalid_date": 12,
+    "unauthorized_user": 8
+  },
+  "overall_accuracy": 1.0,
+  "correct_predictions": 400,
+  "total_predictions": 400,
+  "by_scenario": [
+    {
+      "scenario": "database_unavailable",
+      "count": 24,
+      "expected_action": "MANUAL REVIEW",
+      "accuracy": 1.0,
+      "actual_actions": "MANUAL REVIEW: 24"
+    },
+    {
+      "scenario": "duplicate_id",
+      "count": 20,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 20"
+    },
+    {
+      "scenario": "genuine_expired",
+      "count": 30,
+      "expected_action": "MANUAL REVIEW",
+      "accuracy": 1.0,
+      "actual_actions": "MANUAL REVIEW: 30"
+    },
+    {
+      "scenario": "genuine_valid",
+      "count": 150,
+      "expected_action": "VERIFIED",
+      "accuracy": 1.0,
+      "actual_actions": "VERIFIED: 150"
+    },
+    {
+      "scenario": "hash_mismatch",
+      "count": 24,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 24"
+    },
+    {
+      "scenario": "id_not_found",
+      "count": 30,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 30"
+    },
+    {
+      "scenario": "institution_altered",
+      "count": 20,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 20"
+    },
+    {
+      "scenario": "invalid_date",
+      "count": 12,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 12"
+    },
+    {
+      "scenario": "missing_field",
+      "count": 12,
+      "expected_action": "MANUAL REVIEW",
+      "accuracy": 1.0,
+      "actual_actions": "MANUAL REVIEW: 12"
+    },
+    {
+      "scenario": "name_altered",
+      "count": 30,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 30"
+    },
+    {
+      "scenario": "name_initials_variant",
+      "count": 20,
+      "expected_action": "MANUAL REVIEW",
+      "accuracy": 1.0,
+      "actual_actions": "MANUAL REVIEW: 20"
+    },
+    {
+      "scenario": "qualification_altered",
+      "count": 20,
+      "expected_action": "SUSPICIOUS",
+      "accuracy": 1.0,
+      "actual_actions": "SUSPICIOUS: 20"
+    },
+    {
+      "scenario": "unauthorized_user",
+      "count": 8,
+      "expected_action": "ACCESS DENIED",
+      "accuracy": 1.0,
+      "actual_actions": "ACCESS DENIED: 8"
+    }
+  ],
+  "confusion_matrix": {
+    "index": [
+      "ACCESS DENIED",
+      "MANUAL REVIEW",
+      "SUSPICIOUS",
+      "VERIFIED"
+    ],
+    "columns": [
+      "ACCESS DENIED",
+      "MANUAL REVIEW",
+      "SUSPICIOUS",
+      "VERIFIED"
+    ],
+    "values": [
+      [
+        8,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        86,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        156,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        150
+      ]
+    ]
+  },
+  "false_accepts_on_synthetic_forged_cases": 0,
+  "genuine_cases_flagged_suspicious": 0,
+  "duplicate_certificate_ids_in_submissions": 0
+}

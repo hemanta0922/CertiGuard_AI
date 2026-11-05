@@ -1,0 +1,6 @@
+Method,Sample size,Sample mean,Population mean,Error (x_bar - mu),Abs error %
+Simple random,39,267.0,436.8969,-169.8969,38.89
+Systematic,39,417.7949,436.8969,-19.102,4.37
+Stratified,39,491.8718,436.8969,54.9749,12.58
+Cluster,150,494.3067,436.8969,57.4098,13.14
+Convenience,39,418.1282,436.8969,-18.7687,4.3

@@ -1,0 +1,253 @@
+# CertiGuard AI
+
+**A rule-based certificate verification prototype with reproducible synthetic data and statistical experiments.**
+
+CertiGuard demonstrates how an intelligent agent can compare submitted certificate metadata with institutional records, flag inconsistencies, and route uncertain cases to a human reviewer. The repository also includes experiments on sampling, sampling distributions, descriptive statistics, skewness, kurtosis, and outlier detection.
+
+> **Important scope note:** The supplied ZIP did not contain a web application, PDF/image upload pipeline, OCR model, trained machine-learning model, or live connection to an institution. This repository is therefore an improved, runnable **educational prototype**, not a production certificate-authentication service. Its generated records and document-digest values are synthetic.
+
+## What was corrected
+
+- Separated the verification agent from the large dataset-generation script.
+- Fixed the initials-only name mismatch: for example, `A. Sharma` versus `Aarav Sharma` now becomes **MANUAL REVIEW**, not an automatic suspicious finding or a verified match.
+- Added checks that compare both `issue_date` and `expiry_date` with the institutional record. The original agent did not compare these dates to the issuer record.
+- Added chronology and issuer-status checks: issue date must not be after expiry date or the evaluation date; revoked, suspended, missing, and unrecognized issuer statuses are not marked VERIFIED.
+- Removed the global date monkey-patching technique. The agent now accepts an explicit evaluation date, making tests deterministic without changing global date behaviour.
+- Made scripts locate input/output folders relative to the repository, not whichever working directory happens to be open in a terminal.
+- Fixed Experiment 5 to use the generated CertiGuard data instead of the missing `student_data.csv`; the stratified sample allocation now uses proportional largest-remainder allocation.
+- Fixed Experiment 7's hard-coded `Experiment-4` path.
+- Added validation, automated tests, a dependency manifest, a GitHub Actions workflow, and setup documentation.
+
+See [AUDIT_REPORT.md](AUDIT_REPORT.md) for the original findings and [ENHANCEMENT_ROADMAP.md](ENHANCEMENT_ROADMAP.md) for the next development stages.
+
+## Project structure
+
+```text
+CertiGuard-AI/
+├── .github/
+│   └── workflows/
+│       └── tests.yml                 # Automated tests on GitHub
+├── data/
+│   └── README.md                     # Synthetic-data policy
+├── outputs/                          # Generated experiment reports (ignored by Git)
+│   └── .gitkeep
+├── examples/
+│   └── sample_certificate.json
+├── scripts/
+│   ├── generate_certificate_dataset.py
+│   ├── verify_metadata.py
+│   ├── sampling_experiment.py        # Experiment 5
+│   ├── sampling_distribution_experiment.py  # Experiment 6
+│   └── shape_outliers_groups.py      # Experiment 7
+├── src/
+│   └── certiguard/
+│       ├── __init__.py
+│       ├── agent.py                  # Rule-based verification engine
+│       └── synthetic.py              # Reproducible benchmark generator
+├── tests/
+│   ├── test_agent.py
+│   └── test_synthetic.py
+├── .gitignore
+├── AUDIT_REPORT.md
+├── ENHANCEMENT_ROADMAP.md
+├── LICENSE
+├── pyproject.toml
+├── README.md
+└── requirements.txt
+```
+
+## Requirements
+
+- Python 3.10 or newer
+- pip
+- Internet access only for the initial package installation
+
+The package dependencies are NumPy, pandas, and Matplotlib. Pytest is used for tests.
+
+## Setup on Windows (PowerShell)
+
+Open a terminal in the repository folder.
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
+
+If PowerShell blocks virtual-environment activation, open Command Prompt and use:
+
+```bat
+.venv\Scripts\activate.bat
+```
+
+Or install from `requirements.txt` instead:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+## Run the complete project
+
+Run commands from the repository root. The scripts also resolve their paths from their own file locations, so they do not depend on the terminal's current folder.
+
+### 1. Generate the synthetic dataset
+
+```powershell
+python scripts/generate_certificate_dataset.py
+```
+
+The generator creates a reproducible 400-case test dataset and synthetic issuer records under `data/generated/`:
+
+- `certificate_dataset.csv`
+- `certificate_dataset_agent_results.csv`
+- `institutional_records_demo.csv`
+- `stats.json`
+- `action_distribution.png`
+- `scenario_accuracy.png`
+- `expiry_distribution.png`
+
+The benchmark includes valid certificates, expired certificates, missing IDs, altered fields, duplicate identifiers, unavailable-database cases, incomplete fields, invalid dates, unauthorized requests, and initials-only name variants.
+
+Use another random seed when needed:
+
+```powershell
+python scripts/generate_certificate_dataset.py --seed 123
+```
+
+Choose a different output folder:
+
+```powershell
+python scripts/generate_certificate_dataset.py --output-dir .\data\my_run --seed 123
+```
+
+### 2. Verify sample metadata from the command line
+
+After generating the dataset, run the included example against the synthetic issuer records:
+
+```powershell
+python scripts/verify_metadata.py --authorized-user
+```
+
+To test an initials-only name variant, create a copy of `examples/sample_certificate.json`, change the first name to its initial (for example, `R. Chauhan`), and pass that copy with `--certificate`. The expected outcome is `MANUAL REVIEW`. The `--authorized-user` flag only simulates authorization for this local demonstration; it is not an authentication mechanism.
+
+### 3. Run Experiment 5 — Sampling methods
+
+```powershell
+python scripts/sampling_experiment.py
+```
+
+Compares simple random, systematic, stratified, cluster, and convenience sampling. Output is written to `outputs/experiment5/`.
+
+### 4. Run Experiment 6 — Sampling distribution and descriptive statistics
+
+```powershell
+python scripts/sampling_distribution_experiment.py
+```
+
+Studies the distribution of sample means, standard error, mean/median/mode, range, variance, standard deviation, IQR, and the effect of outliers. Output is written to `outputs/experiment6/`.
+
+### 5. Run Experiment 7 — Shape and outliers
+
+```powershell
+python scripts/shape_outliers_groups.py
+```
+
+Calculates five-number summaries, skewness, kurtosis, IQR outliers, and group comparisons. Output is written to `outputs/experiment7/`.
+
+### 6. Run tests
+
+```powershell
+pytest
+```
+
+The tests cover authorization, database outages, missing/invalid data, name variants, date mismatches, altered fields, duplicate IDs, expired records, and the generated benchmark.
+
+## How the verification agent works
+
+The core class is `CertificateVerificationAgent` in `src/certiguard/agent.py`.
+
+1. **Authorization:** denies the request unless the environment explicitly says the requester is authorized.
+2. **Database availability:** routes the case to manual review when institutional records cannot be reached.
+3. **Required fields:** checks certificate ID, holder name, institution, qualification, dates, and digest metadata.
+4. **Date validation:** requires ISO `YYYY-MM-DD` dates and checks that the issue date is not in the future or after the expiry date.
+5. **Issuer lookup:** searches for the certificate ID and detects duplicate source records.
+6. **Identity and qualification checks:** compares holder name, institution, and qualification with the issuer record. A first-name initial variant is not auto-accepted; it is sent to a human reviewer.
+7. **Date and integrity checks:** compares issue and expiry dates with the issuer's stored values and compares the submitted digest metadata.
+8. **Validity:** an otherwise matching expired certificate is routed to manual review.
+
+The result includes `action`, `status`, `reason`, `rules`, and `observations`. The rule trace helps explain why the agent selected an outcome.
+
+### Meaning of the outcomes
+
+| Action | Meaning |
+|---|---|
+| `VERIFIED` | The tested metadata matches the currently available issuer record and is within its validity period. |
+| `MANUAL REVIEW` | The result is uncertain, incomplete, expired, or requires a human identity check. |
+| `SUSPICIOUS` | A mismatch or data-integrity concern was found. This is a review flag, **not proof of fraud**. |
+| `ACCESS DENIED` | The requester did not pass the authorization check. |
+
+## Use the agent in your own Python code
+
+```python
+from datetime import date
+from certiguard import CertificateVerificationAgent
+
+issuer_records = [
+    {
+        "certificate_id": "CERT-001",
+        "name": "Aarav Sharma",
+        "institution": "Example University",
+        "qualification": "B.Tech Computer Science",
+        "issue_date": "2024-06-15",
+        "expiry_date": "2028-06-15",
+        "document_hash": "DEMO_DIGEST_001",
+    }
+]
+
+agent = CertificateVerificationAgent(issuer_records, today=date(2026, 11, 5))
+submitted_certificate = dict(issuer_records[0])
+environment = {"authorized_user": True, "database_available": True}
+
+result = agent.evaluate(submitted_certificate, environment)
+print(result["action"])
+print(result["reason"])
+for rule in result["rules"]:
+    print("-", rule)
+```
+
+The issuer records must come from a trusted source. Do not let an end user supply or edit the trusted issuer database.
+
+## Important security and accuracy limitations
+
+- The `HASH_...` / `DEMO_DIGEST_...` values in the benchmark are placeholders. They are **not** SHA-256 values calculated from uploaded PDF bytes and do not prove document authenticity.
+- The authorization flag in this educational engine is supplied through the `environment` parameter. A real application must authenticate users on the server and enforce roles there; a browser-supplied boolean is not security.
+- The synthetic benchmark accuracy measures agreement with labels generated by this script. It is not evidence of real-world accuracy, and no real certificate fraud prevalence or performance is claimed.
+- An issuer record not found by this prototype is flagged for investigation. It does not establish that the certificate is fake.
+- Do not upload real student documents or personal information to a public repository. Keep test data synthetic and keep secrets out of Git.
+
+## GitHub contribution workflow
+
+Create a new **empty** repository on GitHub named `CertiGuard-AI` (do not initialize it with another README if you plan to push this folder as-is). Then, in PowerShell at the project root:
+
+```powershell
+git init
+git add .
+git status
+git commit -m "Initial CertiGuard AI prototype"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/CertiGuard-AI.git
+git push -u origin main
+```
+
+Replace `YOUR-USERNAME` with your GitHub username. GitHub authentication should be handled by Git Credential Manager or the official GitHub CLI. **Do not paste a personal access token into the source code or commit it.**
+
+For future changes:
+
+```powershell
+git add .
+git commit -m "Describe the change"
+git push
+```
+
+The workflow in `.github/workflows/tests.yml` runs the tests and generates the benchmark whenever you push or open a pull request.

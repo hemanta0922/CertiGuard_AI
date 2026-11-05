@@ -1,0 +1,21 @@
+Variable,record_id,Value,ground_truth,scenario
+days_since_issue,R035,1594.0,Genuine (expired),genuine_expired
+days_since_issue,R207,1616.0,Genuine (expired),genuine_expired
+days_since_issue,R055,1638.0,Genuine (expired),genuine_expired
+days_since_issue,R338,1719.0,Genuine (expired),genuine_expired
+days_since_issue,R205,1726.0,Genuine (expired),genuine_expired
+days_to_expiry,R338,-989.0,Genuine (expired),genuine_expired
+days_to_expiry,R055,-907.0,Genuine (expired),genuine_expired
+days_to_expiry,R207,-885.0,Genuine (expired),genuine_expired
+days_to_expiry,R035,-863.0,Genuine (expired),genuine_expired
+days_to_expiry,R183,-729.0,Genuine (expired),genuine_expired
+days_to_expiry,R064,-682.0,Genuine (expired),genuine_expired
+days_to_expiry,R163,-637.0,Genuine (expired),genuine_expired
+days_to_expiry,R205,-630.0,Genuine (expired),genuine_expired
+days_to_expiry,R370,-592.0,Genuine (expired),genuine_expired
+days_to_expiry,R141,-580.0,Genuine (expired),genuine_expired
+days_to_expiry,R073,-577.0,Genuine (expired),genuine_expired
+days_to_expiry,R217,-550.0,Genuine (expired),genuine_expired
+days_to_expiry,R015,1405.0,Forged / altered,duplicate_id
+days_to_expiry,R046,1438.0,Forged / altered,id_not_found
+days_to_expiry,R389,1455.0,Genuine,genuine_valid
